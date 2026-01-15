@@ -1,0 +1,119 @@
+version: "3.8"
+
+services:
+  # Original NVIDIA GPU variant
+  wyoming-onnx-asr:
+    image: ghcr.io/tboby/wyoming-onnx-asr-gpu
+    container_name: wyoming-onnx-asr-gpu
+    environment:
+      - TZ=Europe/Madrid
+      - HF_HUB_CACHE=/data/huggingface
+    volumes:
+      - /root/wyoming_onnx_asr_data:/data
+    ports:
+      - 10301:10300
+    restart: unless-stopped
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: >
+      --model-multilingual nemo-parakeet-tdt-0.6b-v3
+      --uri tcp://0.0.0.0:10300
+
+  # Standard CPU with INT8 (your original)
+  wyoming-onnx-asr-cpu-int8:
+    image: ghcr.io/tboby/wyoming-onnx-asr
+    container_name: wyoming-onnx-asr-cpu-int8
+    environment:
+      - TZ=Europe/Madrid
+      - HF_HUB_CACHE=/data/huggingface
+    volumes:
+      - /root/wyoming_onnx_asr_data:/data
+    ports:
+      - 10302:10300
+    restart: unless-stopped
+    command: >
+      --model-multilingual nemo-parakeet-tdt-0.6b-v3
+      --quantization int8
+      --uri tcp://0.0.0.0:10300
+
+  # Standard CPU with FP32 (fair comparison with OpenVINO)
+  wyoming-onnx-asr-cpu-fp32:
+    image: ghcr.io/tboby/wyoming-onnx-asr
+    container_name: wyoming-onnx-asr-cpu-fp32
+    environment:
+      - TZ=Europe/Madrid
+      - HF_HUB_CACHE=/data/huggingface
+    volumes:
+      - /root/wyoming_onnx_asr_data:/data
+    ports:
+      - 10305:10300                    # New port for FP32 comparison
+    restart: unless-stopped
+    command: >
+      --model-multilingual nemo-parakeet-tdt-0.6b-v3
+      --uri tcp://0.0.0.0:10300
+
+  # OpenVINO Intel iGPU variant
+  wyoming-onnx-asr-openvino-gpu:
+    image: ghcr.io/cibernox/wyoming-onnx-asr-openvino-openvino:main
+    container_name: wyoming-onnx-asr-openvino-gpu
+    environment:
+      - TZ=Europe/Madrid
+      - HF_HUB_CACHE=/data/huggingface
+      - OV_CACHE_DIR=/data/openvino
+      - OV_ENABLE_DEVICE_CACHE=1
+    volumes:
+      - /root/wyoming_onnx_asr_data:/data
+    devices:
+      - /dev/dri:/dev/dri
+    ports:
+      - 10303:10300
+    restart: unless-stopped
+    command: >
+      --model-multilingual nemo-parakeet-tdt-0.6b-v3
+      --device openvino-gpu
+      --uri tcp://0.0.0.0:10300
+
+  # OpenVINO Intel CPU variant (FP32)
+  wyoming-onnx-asr-openvino-cpu-fp32:
+    image: ghcr.io/cibernox/wyoming-onnx-asr-openvino-openvino-cpu:main
+    container_name: wyoming-onnx-asr-openvino-cpu-fp32
+    environment:
+      - TZ=Europe/Madrid
+      - HF_HUB_CACHE=/data/huggingface
+      - OV_CACHE_DIR=/data/openvino
+      - OV_ENABLE_DEVICE_CACHE=1
+    volumes:
+      - /root/wyoming_onnx_asr_data:/data
+    ports:
+      - 10304:10300
+    restart: unless-stopped
+    command: >
+      --model-multilingual nemo-parakeet-tdt-0.6b-v3
+      --device openvino-cpu
+      --uri tcp://0.0.0.0:10300
+
+  # OpenVINO Intel CPU variant (INT8) - for speed comparison
+  wyoming-onnx-asr-openvino-cpu-int8:
+    image: ghcr.io/cibernox/wyoming-onnx-asr-openvino-openvino-cpu:main
+    container_name: wyoming-onnx-asr-openvino-cpu-int8
+    environment:
+      - TZ=Europe/Madrid
+      - HF_HUB_CACHE=/data/huggingface
+      - OV_CACHE_DIR=/data/openvino
+      - OV_ENABLE_DEVICE_CACHE=1
+    volumes:
+      - /root/wyoming_onnx_asr_data:/data
+    ports:
+      - 10306:10300
+    restart: unless-stopped
+    command: >
+      --model-multilingual nemo-parakeet-tdt-0.6b-v3
+      --device openvino-cpu
+      --quantization int8
+      --uri tcp://0.0.0.0:10300

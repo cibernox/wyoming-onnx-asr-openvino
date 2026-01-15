@@ -129,8 +129,10 @@ async def main() -> None:
     if args.device == "openvino-cpu":
         openvino_options = {
             "device_type": "CPU",
-            "precision": "FP32",
             "cache_dir": os.getenv("OV_CACHE_DIR", "/cache/openvino"),
+            "num_of_threads": "0",  # Use all available cores
+            "enable_cpu_pinning": "true",
+            "enable_dynamic_shapes": "false",
         }
         providers = [("OpenVINOExecutionProvider", openvino_options)] + providers
         _LOGGER.info("Using OpenVINO CPU execution provider")
