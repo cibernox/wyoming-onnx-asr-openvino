@@ -36,7 +36,8 @@ RUN apt-get update && apt-get install -y \
     && wget -qO - https://repositories.intel.com/graphics/intel-graphics.key | gpg --dearmor | tee /usr/share/keyrings/intel-graphics.gpg > /dev/null \
     && echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/intel-graphics.gpg] https://repositories.intel.com/graphics/ubuntu focal main' | tee /etc/apt/sources.list.d/intel-graphics.list \
     && apt-get update \
-    && apt-get install -y intel-opencl-icd intel-level-zero-gpu level-zero \
+    && apt-get install -y --fix-broken intel-level-zero-gpu level-zero \
+    && apt-get install -y --fix-broken --allow-downgrades intel-opencl-icd \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
