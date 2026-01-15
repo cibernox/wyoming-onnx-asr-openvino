@@ -30,6 +30,7 @@ FROM python:3.12-slim-bookworm
 # Intel GPU drivers must be installed on the host system
 RUN apt-get update && apt-get install -y \
     ocl-icd-libopencl1 \
+    clinfo \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

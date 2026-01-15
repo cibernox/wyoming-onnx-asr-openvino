@@ -56,6 +56,8 @@ services:
       - /root/wyoming_onnx_asr_data:/data
     devices:
       - /dev/dri:/dev/dri              # Mount Intel GPU
+    group_add:
+      - video                          # Add video group for GPU access
     ports:
       - 10303:10300                    # Different port for benchmarking
     restart: unless-stopped
