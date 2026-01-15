@@ -26,20 +26,10 @@ FROM python:3.12-slim-bookworm
 # It is important to use the image that matches the builder, as the path to the
 # Python executable must be the same.
 
-# Install Intel GPU runtime and OpenCL support
-# Download Intel's runtime packages directly
+# Install minimal OpenCL support - Intel drivers provided by host
 RUN apt-get update && apt-get install -y \
-    wget \
-    clinfo \
     ocl-icd-libopencl1 \
-    && mkdir -p /tmp/intel-gpu \
-    && cd /tmp/intel-gpu \
-    && wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.15136.20/intel-igc-core_1.0.15136.20_amd64.deb \
-    && wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.15136.20/intel-igc-opencl_1.0.15136.20_amd64.deb \
-    && wget https://github.com/intel/compute-runtime/releases/download/23.35.27191.42/intel-level-zero-gpu_1.3.27191.42_amd64.deb \
-    && wget https://github.com/intel/compute-runtime/releases/download/23.35.27191.42/intel-opencl-icd_23.35.27191.42_amd64.deb \
-    && dpkg -i *.deb || apt-get install -f -y \
-    && rm -rf /tmp/intel-gpu \
+    clinfo \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
