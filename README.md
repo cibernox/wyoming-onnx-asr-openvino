@@ -68,6 +68,8 @@ You may need to adjust this environment variable when using a read-only root fil
 
 This project includes support for Intel hardware acceleration through OpenVINO, which can significantly improve performance on Intel CPUs and integrated GPUs.
 
+**Platform Support:** OpenVINO variants are available for **x86_64 only** (Intel/AMD processors). ARM64 is not supported by onnxruntime-openvino.
+
 #### Device Options
 
 - `--device openvino-cpu`: Use OpenVINO CPU execution provider (optimized for Intel CPUs)
