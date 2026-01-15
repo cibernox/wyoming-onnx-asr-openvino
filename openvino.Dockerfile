@@ -26,20 +26,11 @@ FROM python:3.12-slim-bookworm
 # It is important to use the image that matches the builder, as the path to the
 # Python executable must be the same.
 
-# Install Intel GPU drivers and OpenCL support
-# Try Intel's repository first, fallback to available packages
+# Install minimal OpenCL support
+# Note: Full Intel GPU drivers should be installed on host system
 RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    ca-certificates \
-    && (wget -qO - https://repositories.intel.com/graphics/intel-graphics.key | apt-key add - || true) \
-    && (echo 'deb [arch=amd64] https://repositories.intel.com/graphics/ubuntu focal main' > /etc/apt/sources.list.d/intel-graphics.list || true) \
-    && apt-get update && apt-get install -y \
     ocl-icd-libopencl1 \
     clinfo \
-    $(apt-cache search intel-opencl-icd | head -1 | cut -d' ' -f1) \
-    $(apt-cache search intel-level-zero-gpu | head -1 | cut -d' ' -f1) \
-    $(apt-cache search level-zero | head -1 | cut -d' ' -f1) \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

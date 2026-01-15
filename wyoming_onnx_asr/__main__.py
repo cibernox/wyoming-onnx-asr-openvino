@@ -138,14 +138,22 @@ async def main() -> None:
         _LOGGER.info("Using OpenVINO CPU execution provider")
 
     if args.device == "openvino-gpu":
-        openvino_options = {
-            "device_type": "GPU",
-            "precision": "FP16",
-            "cache_dir": os.getenv("OV_CACHE_DIR", "/cache/openvino"),
-            "enable_opencl_throttling": "false",
-        }
-        providers = [("OpenVINOExecutionProvider", openvino_options)] + providers
-        _LOGGER.info("Using OpenVINO GPU execution provider for Intel iGPU")
+        # Check available OpenVINO providers first
+        available_providers = onnxruntime.get_available_providers()
+        _LOGGER.info("Available ONNX providers: %s", available_providers)
+
+        if "OpenVINOExecutionProvider" in available_providers:
+            openvino_options = {
+                "device_type": "GPU",
+                "precision": "FP16",
+                "cache_dir": os.getenv("OV_CACHE_DIR", "/cache/openvino"),
+                "enable_opencl_throttling": "false",
+            }
+            providers = [("OpenVINOExecutionProvider", openvino_options)] + providers
+            _LOGGER.info("Using OpenVINO GPU execution provider for Intel iGPU")
+        else:
+            _LOGGER.warning("OpenVINOExecutionProvider not available, falling back to CPU")
+            providers = ["CPUExecutionProvider"]
 
     # Load multiple models and build container
     models = {}
