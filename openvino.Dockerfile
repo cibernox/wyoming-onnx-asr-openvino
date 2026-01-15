@@ -26,19 +26,21 @@ FROM python:3.12-slim-bookworm
 # It is important to use the image that matches the builder, as the path to the
 # Python executable must be the same.
 
-# Install Intel GPU drivers and OpenCL support in container
+# Install Intel GPU drivers using manual .deb downloads to avoid conflicts
 RUN apt-get update && apt-get install -y \
     wget \
-    gnupg \
-    software-properties-common \
-    ocl-icd-libopencl1 \
     clinfo \
-    && wget -qO - https://repositories.intel.com/graphics/intel-graphics.key | gpg --dearmor | tee /usr/share/keyrings/intel-graphics.gpg > /dev/null \
-    && echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/intel-graphics.gpg] https://repositories.intel.com/graphics/ubuntu focal main' | tee /etc/apt/sources.list.d/intel-graphics.list \
-    && apt-get update \
-    && apt-get install -y --fix-broken intel-level-zero-gpu level-zero \
-    && apt-get install -y --fix-broken --allow-downgrades intel-opencl-icd \
-    && rm -rf /var/lib/apt/lists/*
+    ocl-icd-libopencl1 \
+    && cd /tmp \
+    && wget https://github.com/intel/compute-runtime/releases/download/23.35.27191.42/intel-opencl-icd_23.35.27191.42_amd64.deb \
+    && wget https://github.com/intel/compute-runtime/releases/download/23.35.27191.42/intel-level-zero-gpu_1.3.27191.42_amd64.deb \
+    && wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.15136.20/intel-igc-core_1.0.15136.20_amd64.deb \
+    && wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.15136.20/intel-igc-opencl_1.0.15136.20_amd64.deb \
+    && dpkg -i intel-igc-core*.deb || apt-get install -f -y \
+    && dpkg -i intel-igc-opencl*.deb || apt-get install -f -y \
+    && dpkg -i intel-level-zero-gpu*.deb || apt-get install -f -y \
+    && dpkg -i intel-opencl-icd*.deb || apt-get install -f -y \
+    && rm -rf /tmp/*.deb /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY --from=packages-builder /app/.venv /app/.venv
