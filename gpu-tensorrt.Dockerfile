@@ -14,9 +14,8 @@ ENV UV_PYTHON_DOWNLOADS=0
 WORKDIR /app
 FROM builder-base AS packages-builder
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --locked --no-install-project --no-dev --extra gpu-trt -v
+    uv sync --no-install-project --no-dev --extra gpu-trt -v
 
 FROM builder-base AS app-builder
 COPY wyoming_onnx_asr/ ./wyoming_onnx_asr/
