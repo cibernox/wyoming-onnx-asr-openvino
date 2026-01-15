@@ -26,13 +26,10 @@ FROM python:3.12-slim-bookworm
 # It is important to use the image that matches the builder, as the path to the
 # Python executable must be the same.
 
-# Install Intel OpenVINO runtime dependencies for GPU support
+# Install minimal dependencies for OpenCL support
+# Intel GPU drivers must be installed on the host system
 RUN apt-get update && apt-get install -y \
-    intel-opencl-icd \
-    intel-level-zero-gpu \
-    level-zero \
     ocl-icd-libopencl1 \
-    clinfo \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

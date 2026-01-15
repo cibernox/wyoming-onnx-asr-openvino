@@ -76,8 +76,23 @@ This project includes support for Intel hardware acceleration through OpenVINO, 
 #### Requirements for Intel GPU Support
 
 - Intel GPU with Gen9 or later (6th generation Core processors or newer)
-- Intel GPU drivers installed
+- **Intel GPU drivers installed ON THE HOST SYSTEM (your server)**
 - For Docker: The `/dev/dri` device must be mounted
+
+**Installing Intel GPU drivers on your server:**
+
+Ubuntu/Debian:
+```bash
+# Add Intel's repository
+wget -qO - https://repositories.intel.com/graphics/intel-graphics.key | sudo apt-key add -
+sudo apt-add-repository 'deb [arch=amd64] https://repositories.intel.com/graphics/ubuntu focal main'
+
+# Install drivers
+sudo apt update
+sudo apt install intel-opencl-icd intel-level-zero-gpu level-zero
+```
+
+The Docker container only needs minimal OpenCL libraries - the actual drivers must be on the host.
 
 #### Docker Compose Examples
 
@@ -103,6 +118,18 @@ docker compose -f compose.openvino-cpu.yaml up
 - Intel iGPU (openvino-gpu): Typically 2-4x faster than CPU, with lower power consumption than discrete GPUs
 - Intel CPU (openvino-cpu): Optimized Intel CPU execution, often faster than standard CPU provider
 - Model caching: First run will be slower due to model compilation, subsequent runs will be faster
+
+#### Troubleshooting
+
+**If Intel GPU is not detected:**
+1. Check if Intel GPU drivers are installed: `ls /dev/dri/`
+2. Verify OpenCL devices: `clinfo` (install with `apt install clinfo`)
+3. Test GPU access in container: `docker run --device /dev/dri:/dev/dri <image> clinfo`
+
+**If OpenVINO fails to start:**
+- The container will automatically fall back to CPU if GPU is unavailable
+- Check container logs for OpenVINO-specific error messages
+- Ensure cache directory has write permissions
 
 ## Running tooling
 Install [mise](https://mise.jdx.dev/) and use `mise run` to get a list of tasks to test, format, lint, run.
