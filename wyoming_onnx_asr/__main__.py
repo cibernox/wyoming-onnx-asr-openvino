@@ -2,6 +2,7 @@
 import argparse
 import asyncio
 import logging
+import os
 import sys
 from functools import partial
 
@@ -28,7 +29,7 @@ async def main() -> None:
     parser.add_argument(
         "--device",
         default="cpu",
-        choices=["cpu", "gpu", "gpu-trt"],
+        choices=["cpu", "gpu", "gpu-trt", "openvino-cpu", "openvino-gpu"],
         help="Device to use for inference (default: cpu)",
     )
     parser.add_argument("--debug", action="store_true", help="Log DEBUG messages")
@@ -123,6 +124,26 @@ async def main() -> None:
         session_options.graph_optimization_level = (
             onnxruntime.GraphOptimizationLevel.ORT_DISABLE_ALL
         )
+
+    # OpenVINO support
+    if args.device == "openvino-cpu":
+        openvino_options = {
+            "device_type": "CPU_FP32",
+            "precision": "FP32",
+            "cache_dir": os.getenv("OV_CACHE_DIR", "/cache/openvino"),
+        }
+        providers = [("OpenVINOExecutionProvider", openvino_options)] + providers
+        _LOGGER.info("Using OpenVINO CPU execution provider")
+
+    if args.device == "openvino-gpu":
+        openvino_options = {
+            "device_type": "GPU_FP16",
+            "precision": "FP16",
+            "cache_dir": os.getenv("OV_CACHE_DIR", "/cache/openvino"),
+            "enable_opencl_throttling": "false",
+        }
+        providers = [("OpenVINOExecutionProvider", openvino_options)] + providers
+        _LOGGER.info("Using OpenVINO GPU execution provider for Intel iGPU")
 
     # Load multiple models and build container
     models = {}

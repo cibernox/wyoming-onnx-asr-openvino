@@ -1,0 +1,26 @@
+services:
+  onnx:
+    build:
+      context: .
+      dockerfile: openvino.Dockerfile
+    command: [
+       "--model-en", "nemo-parakeet-tdt-0.6b-v2",
+      "--uri", "tcp://0.0.0.0:10300"
+    ]
+    volumes:
+      - ./local:/data
+      - ./cache:/cache
+    restart: unless-stopped
+    ports:
+      - "10300:10300"
+    # For Intel GPU access, we need to mount the GPU device
+    # and set appropriate privileges
+    devices:
+      - /dev/dri:/dev/dri
+    privileged: false
+    # Alternative to privileged mode - more secure
+    # Uncomment these if privileged: false doesn't work
+    # cap_add:
+    #   - SYS_ADMIN
+    # security_opt:
+    #   - apparmor:unconfined
