@@ -128,7 +128,7 @@ async def main() -> None:
     # OpenVINO support
     if args.device == "openvino-cpu":
         openvino_options = {
-            "device_type": "CPU_FP32",
+            "device_type": "CPU",
             "precision": "FP32",
             "cache_dir": os.getenv("OV_CACHE_DIR", "/cache/openvino"),
         }
@@ -137,7 +137,7 @@ async def main() -> None:
 
     if args.device == "openvino-gpu":
         openvino_options = {
-            "device_type": "GPU_FP16",
+            "device_type": "GPU",
             "precision": "FP16",
             "cache_dir": os.getenv("OV_CACHE_DIR", "/cache/openvino"),
             "enable_opencl_throttling": "false",
