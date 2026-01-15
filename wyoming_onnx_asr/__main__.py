@@ -148,7 +148,6 @@ async def main() -> None:
 
         openvino_options = {
             "device_type": "GPU",
-            "precision": "FP16",
             "cache_dir": os.getenv("OV_CACHE_DIR", "/cache/openvino"),
             "enable_opencl_throttling": "false",
         }
